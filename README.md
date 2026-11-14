@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # MedSecure-XR
 
 Pengamanan citra rontgen dada dengan **watermarking fragile di RONI** + **kriptografi**
@@ -39,3 +40,6 @@ Upload `MedSecure_XR_Colab.ipynb` → Runtime → Run all → pilih citra saat d
 
 - Kunci di demo dibangkitkan per sesi. File `*keys*.json` berisi kunci privat — jangan di-commit.
 - Watermark sengaja *fragile*: kompresi JPEG dianggap manipulasi. Simpan citra sebagai PNG.
+=======
+# MedSecure
+>>>>>>> d3a488e4bb55a595df9f26efc111cef29c916430
