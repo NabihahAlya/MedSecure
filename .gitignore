@@ -1,0 +1,5 @@
+*keys*.json
+__pycache__/
+.venv/
+output/
+hasil_medsecure.zip
