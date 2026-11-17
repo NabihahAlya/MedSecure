@@ -204,16 +204,20 @@ def _header(h: int, w: int) -> bytes:
 HEADER_LEN = len(MAGIC) + 7
 
 
-def build_body(canon: np.ndarray, epr_text: str, keys: KeyBundle, times: dict | None = None) -> bytes:
+def build_body(canon: np.ndarray, epr_text: str, keys: KeyBundle, times: dict | None = None,
+               on_step=None) -> bytes:  # BARU: on_step (opsional) = callback teks progres
     times = times if times is not None else {}
+    step = on_step or (lambda _msg: None)  # BARU
     h, w = canon.shape
     hdr = _header(h, w)
 
+    step("Mengenkripsi EPR dengan AES-GCM...")  # BARU
     s = time.perf_counter()
     nonce = os.urandom(GCM_NONCE_LEN)
     ct = AESGCM(keys.k_epr).encrypt(nonce, epr_text.encode("utf-8"), hdr)
     times["epr_encrypt"] = time.perf_counter() - s
 
+    step("Menandatangani...")  # BARU (HMAC per blok + tanda tangan Ed25519)
     s = time.perf_counter()
     tags = block_tags(canon, keys.k_wm)
     times["block_tags"] = time.perf_counter() - s
@@ -263,20 +267,27 @@ def max_epr_bytes(cover: np.ndarray) -> int:
 # --------------------------------------------------------------------------
 # Sender: protect
 # --------------------------------------------------------------------------
-def protect(cover: np.ndarray, epr_text: str, keys: KeyBundle, mode: str = "siv") -> dict:
-    """Embed signed+encrypted EPR in RONI, then encrypt the whole image."""
+def protect(cover: np.ndarray, epr_text: str, keys: KeyBundle, mode: str = "siv", on_step=None) -> dict:
+    """Embed signed+encrypted EPR in RONI, then encrypt the whole image.
+
+    on_step (BARU, opsional): callback(str) dipanggil di awal tiap tahap untuk teks progres.
+    Dipanggil di luar blok pengukuran waktu, jadi angka `times` tidak terpengaruh.
+    """
+    step = on_step or (lambda _msg: None)  # BARU
     t = {}
+    step("Mendeteksi RONI...")  # BARU
     s = time.perf_counter()
     mask = roni_mask(cover)
     canon = canonical(cover, mask)
     order = embedding_order(mask, keys.k_wm)
     t["roni_mask"] = time.perf_counter() - s
 
-    body = build_body(canon, epr_text, keys, t)
+    body = build_body(canon, epr_text, keys, t, on_step=on_step)  # BARU: teruskan on_step
     bits = body_to_bits(body)
     if bits.size > order.size:
         raise WatermarkError(f"Kapasitas RONI tidak cukup: butuh {bits.size} bit, tersedia {order.size} bit")
 
+    step("Menyisipkan ke LSB RONI...")  # BARU
     s = time.perf_counter()
     flat = cover.ravel().copy()
     pos = order[:bits.size]
@@ -284,9 +295,11 @@ def protect(cover: np.ndarray, epr_text: str, keys: KeyBundle, mode: str = "siv"
     wm = flat.reshape(cover.shape)
     t["embed"] = time.perf_counter() - s
 
+    step("Mengenkripsi citra dengan AES-SIV...")  # BARU
     s = time.perf_counter()
     enc, meta = aes_encrypt(wm, keys.k_img, mode)
     t["img_encrypt"] = time.perf_counter() - s
+    step("Selesai!")  # BARU
     return {"watermarked": wm, "encrypted": enc, "meta": meta, "mode": mode, "mask": mask,
             "bits": bits, "body_len": len(body), "capacity_bits": int(order.size), "times": t}
 

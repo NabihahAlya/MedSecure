@@ -6,13 +6,14 @@ import io
 import runpy
 import sys
 import types
+from types import SimpleNamespace
 from pathlib import Path
 
 import numpy as np
 
 APP = Path(__file__).resolve().parents[1] / "app.py"
 LOG = []
-CTRL = {"page": None, "buttons": True, "select": 0, "upload": {}}
+CTRL = {"page": None, "buttons": True, "select": 0, "upload": {}, "mode": "Manual Brush", "strokes": None}
 
 
 class SS(dict):
@@ -63,6 +64,8 @@ class Widget(Ctx):
 
     def progress(self, v=0.0, **k): return self
 
+    def empty(self): return self
+
     def spinner(self, *a, **k): return Ctx()
 
     def columns(self, spec, **k):
@@ -101,6 +104,26 @@ class Widget(Ctx):
         assert CTRL["page"] in options
         return CTRL["page"]
 
+    def toggle(self, label, value=False, **k): return value
+
+    def segmented_control(self, label, options, default=None, **k):
+        assert CTRL["mode"] in options
+        return CTRL["mode"]
+
+    def status(self, *a, **k): return Status()
+
+    def expander(self, *a, **k): return Widget()
+
+    def altair_chart(self, chart, **k):
+        chart.to_dict()  # forces Altair to validate the spec
+        self._log("chart", "altair")
+
+
+class Status(Widget):
+    def write(self, *a, **k): self._log("status", *a)
+
+    def update(self, **k): pass
+
 
 class Upload(io.BytesIO):
     def __init__(self, data, name):
@@ -120,13 +143,28 @@ st.sidebar = Widget()
 st.session_state = SS()
 st.set_page_config = lambda **k: None
 st.logo = lambda *a, **k: None
+
+
+def _component(name, **kw):
+    def mount(key=None, data=None, **k):
+        LOG.append(("component", (name,)))
+        if name == "medsecure_payload_grid":
+            assert len(data["items"]) == 10 and all(i["src"].startswith("data:image/png") for i in data["items"])
+            LOG.append(("label", (data["items"][0]["label"],)))
+            LOG.append(("label", (data["items"][-1]["label"],)))
+        return SimpleNamespace(strokes=CTRL["strokes"])
+    return mount
+
+
+st.components = SimpleNamespace(v2=SimpleNamespace(component=_component))
 sys.modules["streamlit"] = st
 sys.path.insert(0, str(APP.parent))
 
 
 def run(page, **ctrl):
     LOG.clear()
-    CTRL.update({"page": page, "buttons": True, "select": 0, "upload": {}}, **ctrl)
+    CTRL.update({"page": page, "buttons": True, "select": 0, "upload": {}, "mode": "Manual Brush",
+                 "strokes": None}, **ctrl)
     runpy.run_path(str(APP), run_name="__main__")
     return list(LOG)
 
@@ -146,13 +184,26 @@ show("receiver (session pkg)", run("3. Receiver (destination hospital)"))
 bad = bytearray(pkg); bad[-1] ^= 1
 show("receiver (tampered pkg upload)", run("3. Receiver (destination hospital)", upload={"msx": Upload(bytes(bad), "x.msx")}))
 show("receiver (junk upload)", run("3. Receiver (destination hospital)", upload={"msx": Upload(b"hello", "x.msx")}))
-import core as C
-for i, k in enumerate(C.ATTACKS):
-    show(f"attack {k}", run("4. Attack Simulation", select=i), kinds=("success", "warning", "info", "metric"))
+show("sender steps", [x for x in run("2. Sender (origin hospital)") if x[0] in ("status", "info")],
+     kinds=("status", "info"))
+import base64
+from PIL import Image, ImageDraw
+lay = Image.new("RGBA", (768, 512), (0, 0, 0, 0)); ImageDraw.Draw(lay).line((250, 250, 330, 280), fill=(255, 255, 255, 255), width=12)
+buf = io.BytesIO(); lay.save(buf, "PNG")
+strokes = "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()
+show("attack manual brush (no strokes)", run("4. Attack Simulation"), kinds=("info",))
+show("attack manual brush", run("4. Attack Simulation", strokes=strokes), kinds=("success", "warning", "info", "metric"))
+for i, label in enumerate(["Crop", "Tambah Teks Palsu", "Naikkan Brightness", "Hapus Area", "Copy-move",
+                            "Blur lokal", "Noise global", "Kompresi JPEG"]):
+    show(f"auto {label}", run("4. Attack Simulation", mode="Auto Attack", select=i),
+         kinds=("success", "warning", "info", "metric"))
 show("eval", run("5. Evaluate 10 Payloads"), kinds=("chart", "dataframe", "download"))
+show("payload grid", run("6. Perbandingan Semua Payload"), kinds=("component", "label", "chart", "image"))
 show("about", run("About"), kinds=("header",))
 keys_json = st.session_state["kb"].to_json()
 show("keys-load", run("1. Keys", buttons=False, upload={"json": Upload(keys_json.encode(), "k.json")}))
 show("keys-generate-new then receiver (old pkg cleared)", run("1. Keys"))
 show("receiver none", run("3. Receiver (destination hospital)"))
+show("receiver wrong key (old package, new keys)",
+     run("3. Receiver (destination hospital)", upload={"msx": Upload(bytes(pkg), "x.msx")}), kinds=("error",))
 print("ALL STUB RUNS OK")
