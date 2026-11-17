@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-core = (ROOT / "core.py").read_text()
+core = (ROOT / "core.py").read_text(encoding="utf-8")
 
 # ---- split core.py into sections on the "# ---...\n# Title\n# ---..." markers
 parts = re.split(r"\n# -{70,}\n# (.+)\n# -{70,}\n", core)
@@ -187,7 +187,7 @@ for i, payload in enumerate(payloads, 1):
         "bpp_image": p["bits"].size / N_PIXELS, "roni_used_%": 100 * p["bits"].size / CAP_BITS,
         "changed_px": int(np.sum(cover != wm)), "changed_px_ROI": int(np.sum((cover != wm) & ROI)),
         "MSE": mse(cover, wm), "PSNR_dB": psnr(cover, wm), "PSNR_ROI_dB": psnr_region(cover, wm, ROI),
-        "SSIM": ssim(cover, wm),
+        "SSIM": ssim(cover, wm), "SNR_dB": snr(cover, wm),
         "entropy_plain": entropy(wm), "entropy_cipher": entropy(enc),
         "corrH_plain": cp["H"], "corrV_plain": cp["V"], "corrD_plain": cp["D"],
         "corrH_cipher": cc["H"], "corrV_cipher": cc["V"], "corrD_cipher": cc["D"],
@@ -214,7 +214,7 @@ for i, payload in enumerate(payloads, 1):
     Image.fromarray(diff).save(pdir / "diff_x255.png")
     (pdir / "epr_extracted.txt").write_text(v["epr"], encoding="utf-8")
     print(f"[{i:02d}] EPR {row['epr_bytes']:3d} B | PSNR {row['PSNR_dB']:.2f} dB | PSNR_ROI {row['PSNR_ROI_dB']} | "
-          f"SSIM {row['SSIM']:.6f} | H(c) {row['entropy_cipher']:.4f} | NPCR {npcr_d:.2f}% | BER {row['BER']:.0f} | {v['status']}")
+          f"SSIM {row['SSIM']:.6f} | SNR {row['SNR_dB']:.2f} dB | H(c) {row['entropy_cipher']:.4f} | NPCR {npcr_d:.2f}% | BER {row['BER']:.0f} | {v['status']}")
 
 df = pd.DataFrame(rows)
 df.to_csv(OUT_DIR / "results.csv", index=False)
@@ -225,7 +225,7 @@ print("\\nSemua payload lolos:", bool(df["hash_match"].all() and df["epr_match"]
 md("## Tabel hasil")
 code("""
 cols = ["payload", "epr_bytes", "embedded_bits", "bpp_image", "changed_px", "changed_px_ROI", "MSE", "PSNR_dB",
-        "PSNR_ROI_dB", "SSIM", "BER", "NC", "hash_match", "signature_ok", "epr_match"]
+        "PSNR_ROI_dB", "SSIM", "SNR_dB", "BER", "NC", "hash_match", "signature_ok", "epr_match"]
 df[cols].round(6)
 """)
 code("""
@@ -239,8 +239,8 @@ df[["payload", "epr_bytes"] + [f"t_{k}_ms" for k in STAGES_P + STAGES_V] + ["t_s
 md("## Grafik per payload")
 code("""
 x = df["payload"]
-fig, ax = plt.subplots(1, 3, figsize=(15, 4))
-for a, col, title in zip(ax, ["PSNR_dB", "SSIM", "MSE"], ["PSNR seluruh citra (dB)", "SSIM", "MSE"]):
+fig, ax = plt.subplots(1, 4, figsize=(19, 4))
+for a, col, title in zip(ax, ["PSNR_dB", "SSIM", "MSE", "SNR_dB"], ["PSNR seluruh citra (dB)", "SSIM", "MSE", "SNR (dB)"]):
     a.plot(x, df[col], "o-"); a.set_title(title); a.set_xlabel("Payload ke-"); a.set_xticks(x); a.grid(alpha=.3)
 fig.suptitle("Kualitas citra ber-watermark (PSNR area ROI = tak hingga untuk semua payload)")
 fig.tight_layout(); fig.savefig(OUT_DIR / "fig_kualitas.png", dpi=150); plt.show()
@@ -356,7 +356,7 @@ for frac in [0.1, 0.25, 0.5, 0.75, 1.0]:
     p = protect(cover, txt, KEYS)
     v = verify_image(p["watermarked"], KEYS, KEYS.public_key)
     cap_rows.append({"epr_bytes": n, "roni_used_%": 100 * p["bits"].size / CAP_BITS,
-                     "PSNR_dB": psnr(cover, p["watermarked"]), "SSIM": ssim(cover, p["watermarked"]),
+                     "PSNR_dB": psnr(cover, p["watermarked"]), "SSIM": ssim(cover, p["watermarked"]), "SNR_dB": snr(cover, p["watermarked"]),
                      "PSNR_ROI_dB": psnr_region(cover, p["watermarked"], ROI), "status": v["status"]})
 try:
     protect(cover, "X" * (MAX_EPR + 1), KEYS); over = "muat (tidak terduga)"
@@ -386,7 +386,7 @@ for i, (t, s) in enumerate(cells):
     if t == "code":
         c["execution_count"] = None; c["outputs"] = []
     nb["cells"].append(c)
-Path(sys.argv[1]).write_text(json.dumps(nb, indent=1, ensure_ascii=False))
+Path(sys.argv[1]).write_text(json.dumps(nb, indent=1, ensure_ascii=False), encoding="utf-8")
 
 # ---- flat script for local testing
 flat = ["import matplotlib; matplotlib.use('Agg')", "from IPython.display import display" if False else

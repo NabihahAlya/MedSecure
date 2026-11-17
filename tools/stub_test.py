@@ -119,6 +119,7 @@ for name in dir(w):
 st.sidebar = Widget()
 st.session_state = SS()
 st.set_page_config = lambda **k: None
+st.logo = lambda *a, **k: None
 sys.modules["streamlit"] = st
 sys.path.insert(0, str(APP.parent))
 
@@ -137,21 +138,21 @@ def show(tag, log, kinds=("success", "warning", "error", "info", "metric")):
             print(f"   {k}: {a[0]}")
 
 
-show("keys", run("1. Kunci", buttons=False))
-show("keys-generate", run("1. Kunci"))
-show("sender", run("2. Pengirim (RS asal)"))
+show("keys", run("1. Keys", buttons=False))
+show("keys-generate", run("1. Keys"))
+show("sender", run("2. Sender (origin hospital)"))
 pkg = st.session_state["package"]
-show("receiver (session pkg)", run("3. Penerima (RS tujuan)"))
+show("receiver (session pkg)", run("3. Receiver (destination hospital)"))
 bad = bytearray(pkg); bad[-1] ^= 1
-show("receiver (tampered pkg upload)", run("3. Penerima (RS tujuan)", upload={"msx": Upload(bytes(bad), "x.msx")}))
-show("receiver (junk upload)", run("3. Penerima (RS tujuan)", upload={"msx": Upload(b"hello", "x.msx")}))
+show("receiver (tampered pkg upload)", run("3. Receiver (destination hospital)", upload={"msx": Upload(bytes(bad), "x.msx")}))
+show("receiver (junk upload)", run("3. Receiver (destination hospital)", upload={"msx": Upload(b"hello", "x.msx")}))
 import core as C
 for i, k in enumerate(C.ATTACKS):
-    show(f"attack {k}", run("4. Simulasi Serangan", select=i), kinds=("success", "warning", "info", "metric"))
-show("eval", run("5. Evaluasi 10 Payload"), kinds=("chart", "dataframe", "download"))
-show("about", run("Tentang"), kinds=("header",))
+    show(f"attack {k}", run("4. Attack Simulation", select=i), kinds=("success", "warning", "info", "metric"))
+show("eval", run("5. Evaluate 10 Payloads"), kinds=("chart", "dataframe", "download"))
+show("about", run("About"), kinds=("header",))
 keys_json = st.session_state["kb"].to_json()
-show("keys-load", run("1. Kunci", buttons=False, upload={"json": Upload(keys_json.encode(), "k.json")}))
-show("keys-generate-new then receiver (old pkg cleared)", run("1. Kunci"))
-show("receiver none", run("3. Penerima (RS tujuan)"))
+show("keys-load", run("1. Keys", buttons=False, upload={"json": Upload(keys_json.encode(), "k.json")}))
+show("keys-generate-new then receiver (old pkg cleared)", run("1. Keys"))
+show("receiver none", run("3. Receiver (destination hospital)"))
 print("ALL STUB RUNS OK")

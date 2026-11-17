@@ -1,0 +1,10 @@
+[theme]
+base = "light"
+primaryColor = "#0f9d8a"
+backgroundColor = "#f7fdfc"
+secondaryBackgroundColor = "#e9f8f5"
+textColor = "#163c38"
+borderColor = "#bde5dc"
+# Loaded through Streamlit's theme instead of a global CSS override, so the
+# Material Symbols icon font used by Streamlit's built-in icons stays intact.
+font = "Lexend:https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap"

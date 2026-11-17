@@ -298,7 +298,7 @@ def extract_body(img: np.ndarray, k_wm: bytes):
     mask = roni_mask(img)
     order = embedding_order(mask, k_wm)
     if order.size < LEN_BITS:
-        raise WatermarkError("RONI tidak ditemukan pada citra")
+        raise WatermarkError("RONI was not found in the image")
     lsb = (img.ravel()[order] & 1).astype(np.uint8)
     n = int.from_bytes(np.packbits(lsb[:LEN_BITS]).tobytes(), "big")
     if n <= 0 or LEN_BITS + 8 * n > order.size:
@@ -319,7 +319,7 @@ def verify_image(img: np.ndarray, keys: KeyBundle, public_key: Ed25519PublicKey)
     except WatermarkError as e:
         t["extract"] = time.perf_counter() - s
         r["message"] = str(e)
-        r["status"] = "DIMANIPULASI"
+        r["status"] = "TAMPERED"
         return r
     t["extract"] = time.perf_counter() - s
     r["watermark_found"] = True
@@ -353,13 +353,13 @@ def verify_image(img: np.ndarray, keys: KeyBundle, public_key: Ed25519PublicKey)
     t["epr_decrypt"] = time.perf_counter() - s
 
     if r["signature_ok"] and r["epr_ok"] and r["n_tampered"] == 0:
-        r["status"], r["message"] = "AMAN", "Citra asli, tanda tangan dokter valid, EPR utuh"
+        r["status"], r["message"] = "SAFE", "Authentic image, valid doctor signature, and intact EPR"
     elif r["n_tampered"]:
-        r["status"] = "DIMANIPULASI"
-        r["message"] = f"{r['n_tampered']} blok {TAMPER_BLOCK}x{TAMPER_BLOCK} piksel terdeteksi diubah"
+        r["status"] = "TAMPERED"
+        r["message"] = f"{r['n_tampered']} changed {TAMPER_BLOCK}x{TAMPER_BLOCK}-pixel blocks detected"
     else:
-        r["status"] = "DIMANIPULASI"
-        r["message"] = "Tanda tangan / data watermark tidak valid"
+        r["status"] = "TAMPERED"
+        r["message"] = "Invalid signature or watermark data"
     return r
 
 
@@ -369,8 +369,8 @@ def receive(cipher_img: np.ndarray, meta: bytes, keys: KeyBundle, public_key: Ed
     try:
         dec = aes_decrypt(cipher_img, meta, keys.k_img, mode)
     except InvalidTag:
-        return {"status": "DITOLAK", "transit_ok": False, "image": None,
-                "message": "Dekripsi AES-SIV gagal: kunci salah atau ciphertext diubah saat transmisi",
+        return {"status": "REJECTED", "transit_ok": False, "image": None,
+                "message": "AES-SIV decryption failed: wrong key or ciphertext altered in transit",
                 "times": {"img_decrypt": time.perf_counter() - s}}
     t_dec = time.perf_counter() - s
     r = verify_image(dec, keys, public_key)
@@ -412,6 +412,12 @@ def mse(a, b):
 
 def psnr(a, b):
     return float("inf") if mse(a, b) == 0 else float(peak_signal_noise_ratio(a, b, data_range=255))
+
+
+def snr(a, b):
+    """Signal-to-noise ratio (dB): power of the original image / power of the watermark change."""
+    noise = mse(a, b)
+    return float("inf") if noise == 0 else float(10 * np.log10(np.mean(a.astype(np.float64) ** 2) / noise))
 
 
 def psnr_region(a, b, mask):
@@ -473,13 +479,13 @@ def sha256_img(img) -> str:
 # Attack simulation
 # --------------------------------------------------------------------------
 ATTACKS = {
-    "hapus_lesi": "Hapus lesi (isi area dengan rata-rata sekitar)",
-    "copy_move": "Copy-move (tempel area paru lain)",
-    "terangkan": "Terangkan area (+40)",
-    "blur": "Blur lokal",
-    "teks": "Tambah anotasi teks",
-    "noise": "Noise Gaussian global (sigma 2)",
-    "jpeg": "Kompresi JPEG global (Q=90)",
+    "hapus_lesi": "Remove lesion (fill area with surrounding average)",
+    "copy_move": "Copy-move (paste another lung region)",
+    "terangkan": "Brighten region (+40)",
+    "blur": "Local blur",
+    "teks": "Add text annotation",
+    "noise": "Global Gaussian noise (sigma 2)",
+    "jpeg": "Global JPEG compression (Q=90)",
 }
 
 

@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 64" width="300" height="64">
+  <style>@font-face{font-family:LexendLogo;font-weight:700;src:url(data:font/woff2;base64,d09GMgABAAAAAAXgABAAAAAACjgAAAWFAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGhYbghAcKAZgP1NUQVQqAGwRCAqIBIY1CxoAATYCJAMwBCAFg2gHIAwHGzkIyMSHp9N6f1DMJCWnIFNpEbRdqBBy52RFZO1MTsBcLaemC8X40qTACdg/6tLaUaur1b3ROByOwdWejI8TGZ+JkDbCxIZsAdOPau0zkl8tCAAZRpQCcdFy/wzAwR+xoPIKyqbDqnVubzu5wfxi+FdUtNR1t8PizGwlDChY0GvgGCe9LdwOHSxgjpVm0u9wST+NWd9+D0hfn9k/RSD4R2jjlb4IwniBXHAoG3JTTYECC7M7gET6G7UAzWj+NgwwQ5Qhhwns7iCKKC/dKAtxIAIFdmAM5cFc1ahuygA2SekojVhLj3PILMSSNHTz1nEuG0Lt/ZGKyop8bIWAPvpLyYy6mKPkFQFkRZVUyykDAAGYQwAEHfYDHqAGGhp7Sc1ButHCI9yHAdqTjfbsZoATtoNNni8JiEA5pkGDOnSjD548c6by51+Vvpbel05KR6WD0nZptbQy+kmragIiSbAW0o7QJYl6kEyA7PqRxwCGYUvaGtNy/l4ZzzvJGT7JjGEEV5tgJzeG1xFWy8v1YCa5eXL9Gqfm1SvBTM5ftYawWk6mW+nIs3y1qoFnOKJ9Qx2j4WriRBHgWbleFDFpNHIc+Bp1dT2vv3CEaA+f57i5OpMpUy2KvP7MAaJdv//06cBbpmcmon3jjTd4vShGTN//6B6nO7kXk/vOnQq4KYoiJo1GeU09X11n1aDU1Kpq+bk6k4lof/7ZjOmrz5/mdA+OYvLqQ15/5oK70mD89smHV13jaZ7hVAFrDQ+Mav3jE0R7/BH7jz38CdxToih4yFTyYLL+8HlOd8cA4Nr7Ycq9RiPP8srILb+UdjlOX30aLbURlDJgBc1Tk4fOZcWzhcRyKWjjE6OayFHq59fv53d8f+mY5yba3nazyi6aUbGnfN3/P3YzbW8LjWHt/5tbQTYtN+x6u8ZiCVfgdzU892JoAJdrsXDu29AY0hStKRkLsnMzGlvS8tb9/vGxtEMuN6fvGNC51Re7uw/eFEaQZZnfLigz3ep7Y3IXRCS6Xxx2sP5iWeawYqMy4BX3gvCo0Iqi5Nle8fnzPAoSXm5cUEzmenodHra3TbIz9DRr/LLjfAuiigsWDMfjlzdTHLWPnye4vXydG32t4lHEz3mvll4PvYkoy/KhwoLRysqC0aHC8sL+mHBVwwe1H7gGLv8vOFC+IsDNUPyzstFtMAbWXH5zQcZoVVXGaEthgX+Oo9ImRKPa9ukqi8Ffg+WxuQ70SwHTHoeFP54WEKD4IDzsAwUUlhptQeFwZUZQXWHJvOC05BlBikK/ua7cHqfqdMrBZfcpj6D282Hh/tkFfjG+ii9Kmr7O9ymyQaH9WrODT84nKoqDQu0+ux52dHeRg9OsDZ+5cPiHS5saGz5bUbQtVsgY9HCMeO2JQ8Y2+zVmre+cGi73Ray4omYFAAAEACH3dxTNcp5tnf6bBU1/CQBvJzbPAYD3QkzzpJD/32bHmDEQmIECABAmKrE0e0UK+d+cHeuUXymjihBMt0NDXYKGGoYDdVWSKB/4UovhS5XAl9xGIfUCckg2ZckVxNmB8gKYY7ZOjq1sjP5ZxjuthVHV6HbcuYJi2gwMimo7yQoa4XhNy1EndLOChRs0CjM4IVduhUTIrERFCKNFdJvUqEMTGtCI3m17LzrRg1REDbBHq9qb0Ile9CBy/koTWhGJDnSjAVGoRAHKBrQOg3ypHQsQgVx0oBULoNI+8LyqA+0QEINIRBt20kwkjHz7LmmoQCUqkI+0aA3HsS9mxSDciSFUkpPfJCAW0YhBCgRMRyPqICRLq9A9LDejDvO9hnPQVwKQt9k9EBBcGuEGNH3d1Id5iMR8dKDtDe1Ah5RbUYf6vEJZYdS9ISEMsRi68VRpI2KtdOVZIr18lFkEAA==) format("woff2")}</style>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#19c2aa"/>
+      <stop offset=".55" stop-color="#0f9d8a"/>
+      <stop offset="1" stop-color="#075f56"/>
+    </linearGradient>
+    <radialGradient id="glow" cx=".25" cy=".15" r=".7">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".32"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="ink" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#c6f4ea"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="1.6" stdDeviation="1.4" flood-color="#04433d" flood-opacity=".35"/>
+    </filter>
+  </defs>
+  
+
+  <!-- round badge -->
+  <circle cx="32" cy="32" r="31" fill="url(#bg)"/>
+  <circle cx="32" cy="32" r="31" fill="url(#glow)"/>
+  <circle cx="32" cy="32" r="29.4" fill="none" stroke="#ffffff" stroke-opacity=".2"/>
+
+  <!-- script (latin) M -->
+  <path filter="url(#shadow)" fill="none" stroke="url(#ink)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"
+        d="M12.5 43.5C16 44.5 18.2 39.5 19.6 33C21 26.5 22.4 20.5 25.4 20.5C28.6 20.5 28.6 26.5 29 31.5
+           C29.3 35.5 30.6 37 32 33.2C34.2 27 36.2 20.5 39.6 20.5C42.8 20.5 42.6 26 42.2 31.5
+           C41.8 37.5 41.6 43.5 44.8 43.5C47.2 43.5 49.4 41.6 51.2 39"/>
+
+  <text x="76" y="44" font-family="LexendLogo, Lexend, sans-serif" font-weight="700" font-size="31" letter-spacing="-0.6" fill="#0f9d8a">MedSecure-XR</text>
+</svg>
